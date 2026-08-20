@@ -1,0 +1,218 @@
+import React, { useState } from 'react';
+import { useShop } from '../../context/ShopContext';
+import { Settings, Save, Sparkles, Phone, MapPin, Globe, Image as ImageIcon, Truck } from 'lucide-react';
+
+export const AdminSettings = () => {
+  const { storeSettings, updateStoreSettings, formatPrice } = useShop();
+
+  const [formData, setFormData] = useState({ ...storeSettings });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    updateStoreSettings(formData);
+  };
+
+  return (
+    <div className="space-y-6 text-right">
+      
+      {/* Header */}
+      <div className="bg-white rounded-3xl p-5 border border-pink-100/90 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 className="text-base font-black text-slate-900">تنظیمات، بنرها و اطلاعات هویتی فروشگاه</h3>
+          <p className="text-xs text-slate-500 mt-0.5">تغییر متون بنرها، شماره تماس، سقف ارسال رایگان و آدرس شبکه اجتماعی</p>
+        </div>
+
+        <button
+          onClick={handleSubmit}
+          className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black px-6 py-2.5 rounded-2xl shadow-md shadow-pink-200 transition flex items-center gap-2 cursor-pointer"
+        >
+          <Save className="w-4 h-4" />
+          <span>ذخیره تغییرات فروشگاه</span>
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 text-xs">
+        
+        {/* 1. Identity & Domain */}
+        <div className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <Globe className="w-4 h-4 text-pink-600" />
+            <span>اطلاعات پایه و برندینگ</span>
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">نام فروشگاه</label>
+              <input
+                type="text"
+                value={formData.storeName}
+                onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">دامنه سایت</label>
+              <input
+                type="text"
+                value={formData.domain}
+                onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono dir-ltr text-left"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">حداقل مبلغ ارسال رایگان (تومان)</label>
+              <input
+                type="number"
+                value={formData.freeShippingThreshold}
+                onChange={(e) => setFormData({ ...formData, freeShippingThreshold: Number(e.target.value) })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">شعار و عنوان فرعی هدر</label>
+            <input
+              type="text"
+              value={formData.tagline}
+              onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+              className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+            />
+          </div>
+        </div>
+
+        {/* 2. Top Announcement & Hero Texts */}
+        <div className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <Sparkles className="w-4 h-4 text-pink-600" />
+            <span>متون نوار اعلان بالا و بنر هیرو</span>
+          </h4>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">متن نوار اعلان صورتی بالای سایت (Ticker)</label>
+            <input
+              type="text"
+              value={formData.announcementText}
+              onChange={(e) => setFormData({ ...formData, announcementText: e.target.value })}
+              className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">تیتر اصلی بنر هیرو (Headline)</label>
+            <input
+              type="text"
+              value={formData.heroHeadline}
+              onChange={(e) => setFormData({ ...formData, heroHeadline: e.target.value })}
+              className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-bold"
+            />
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">توضیحات تکمیلی هیرو</label>
+            <textarea
+              rows="3"
+              value={formData.heroSubtext}
+              onChange={(e) => setFormData({ ...formData, heroSubtext: e.target.value })}
+              className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 leading-relaxed"
+            />
+          </div>
+        </div>
+
+        {/* 3. Contact & Support Info */}
+        <div className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <Phone className="w-4 h-4 text-pink-600" />
+            <span>اطلاعات تماس، ساعات پاسخگویی و شبکه‌های اجتماعی</span>
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">شماره تماس پشتیبانی</label>
+              <input
+                type="text"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono dir-ltr text-left"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">ساعات کاری و پاسخگویی</label>
+              <input
+                type="text"
+                value={formData.supportHours}
+                onChange={(e) => setFormData({ ...formData, supportHours: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">آیدی اینستاگرام</label>
+              <input
+                type="text"
+                value={formData.instagramHandle}
+                onChange={(e) => setFormData({ ...formData, instagramHandle: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono dir-ltr text-left"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">آدرس دفتر مرکزی و انبار</label>
+            <input
+              type="text"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+            />
+          </div>
+        </div>
+
+        {/* 4. Images URLs */}
+        <div className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <ImageIcon className="w-4 h-4 text-pink-600" />
+            <span>آدرس لوگو و بنرهای تصویری</span>
+          </h4>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">آدرس لوگوی رسمی</label>
+              <input
+                type="text"
+                value={formData.logoUrl}
+                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono dir-ltr text-left"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">آدرس بنر اصلی هیرو</label>
+              <input
+                type="text"
+                value={formData.heroImageUrl}
+                onChange={(e) => setFormData({ ...formData, heroImageUrl: e.target.value })}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300 font-mono dir-ltr text-left"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs font-black px-8 py-3.5 rounded-2xl shadow-lg shadow-pink-300/50 transition flex items-center gap-2 cursor-pointer"
+          >
+            <Save className="w-4 h-4" />
+            <span>ذخیره نهایی تمامی تنظیمات</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  );
+};
