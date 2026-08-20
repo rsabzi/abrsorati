@@ -3,7 +3,7 @@ import { Lock, Eye, EyeOff, X, ShieldCheck } from 'lucide-react';
 import * as api from '../lib/api';
 
 export const AdminLoginModal = ({ onLoginSuccess, isOpen = false, isAuthenticated = false, onClose }) => {
-  const [email, setEmail] = useState('admin@abrsorati.ir');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -33,10 +33,10 @@ export const AdminLoginModal = ({ onLoginSuccess, isOpen = false, isAuthenticate
   if (isAuthenticated || !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-3">
       <div
-        className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl max-w-md w-full p-6 sm:p-10 animate-slide-up-mobile sm:animate-none relative"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+        className="bg-white sm:rounded-2xl rounded-t-3xl shadow-2xl max-w-[360px] w-[calc(100%-1rem)] p-5 sm:p-7 animate-slide-up-mobile sm:animate-none relative"
+        style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
       >
         {/* Close button */}
         <button
@@ -49,12 +49,12 @@ export const AdminLoginModal = ({ onLoginSuccess, isOpen = false, isAuthenticate
         </button>
 
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl mb-4 shadow-inner">
-            <ShieldCheck className="w-8 h-8 text-pink-600" />
+        <div className="text-center mb-5 sm:mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl mb-3 shadow-inner">
+            <ShieldCheck className="w-7 h-7 text-pink-600" />
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900">ورود به پنل مدیریت</h2>
-          <p className="text-slate-500 text-xs sm:text-sm mt-2">این بخش فقط برای مدیر فروشگاه ابر صورتی است</p>
+          <h2 className="text-xl font-black text-slate-900">ورود به پنل مدیریت</h2>
+          <p className="text-slate-500 text-xs mt-1">این بخش فقط برای مدیر فروشگاه است</p>
         </div>
 
         {/* Form */}
@@ -104,17 +104,10 @@ export const AdminLoginModal = ({ onLoginSuccess, isOpen = false, isAuthenticate
             </div>
           )}
 
-          <div className="bg-pink-50 border border-pink-200 rounded-xl p-3 text-xs text-pink-800 text-right leading-relaxed">
-            <p className="font-bold mb-1">🔑 اطلاعات دمو (ورود اولیه):</p>
-            <p className="font-mono dir-ltr text-left">admin@abrsorati.ir</p>
-            <p className="font-mono dir-ltr text-left">Admin@2024</p>
-            <p className="mt-1 text-[10px] text-pink-600">پس از ورود، حتماً رمز عبور را از تنظیمات تغییر دهید.</p>
-          </div>
-
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md shadow-pink-200"
+            className="w-full bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md shadow-pink-200"
           >
             {isLoading ? (
               <>
