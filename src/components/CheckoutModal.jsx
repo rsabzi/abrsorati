@@ -38,7 +38,7 @@ export const CheckoutModal = () => {
     getShippingCost,
     getCartTotal,
     formatPrice,
-    setOrders,
+    placeOrder,
     showToast,
     navigateToHome
   } = useShop();
@@ -81,39 +81,45 @@ export const CheckoutModal = () => {
     setStep(2);
   };
 
-  const handleProcessPayment = () => {
+  const handleProcessPayment = async () => {
     setStep(3); // Show processing spinner
 
-    setTimeout(() => {
-      // Generate order record
-      const newOrderNumber = 'AS-' + Math.floor(100000 + Math.random() * 900000);
-      const postalCodeTracking = '3948' + Math.floor(100000000000 + Math.random() * 900000000000);
-      
-      const orderRecord = {
-        id: newOrderNumber,
-        date: new Date().toLocaleDateString('fa-IR'),
-        items: [...cart],
-        itemsCount: cart.reduce((c, i) => c + i.quantity, 0),
-        subtotal,
-        discount,
-        giftCost,
-        shippingCost,
-        total,
-        customerName: formData.fullName,
-        phone: formData.phone,
-        address: `${formData.province}، ${formData.city}، ${formData.address}`,
-        postalCode: formData.postalCode,
-        shippingMethod: SHIPPING_METHODS.find(m => m.id === selectedShipping)?.name || 'پست پیشتاز',
-        paymentMethod: selectedPayment === 'online-gateway' ? 'پرداخت آنلاین شاپرک (موفق)' : 'پرداخت در محل',
-        trackingCode: postalCodeTracking,
-        giftWrap,
-        giftNote: giftWrap ? giftNote : null,
-        status: 'processing',
-        statusLabel: 'در حال بافت و بسته‌بندی معطر'
-      };
+    const postalCodeTracking = '3948' + Math.floor(100000000000 + Math.random() * 900000000000);
 
-      setConfirmedOrder(orderRecord);
-      setOrders(prev => [orderRecord, ...prev]);
+    const orderRecord = {
+      date: new Date().toLocaleDateString('fa-IR'),
+      createdAt: new Date().toISOString(),
+      items: [...cart],
+      itemsCount: cart.reduce((c, i) => c + i.quantity, 0),
+      subtotal,
+      discount,
+      giftCost,
+      shippingCost,
+      total,
+      customerName: formData.fullName,
+      phone: formData.phone,
+      address: `${formData.province}، ${formData.city}، ${formData.address}`,
+      postalCode: formData.postalCode,
+      shippingMethod: SHIPPING_METHODS.find(m => m.id === selectedShipping)?.name || 'پست پیشتاز',
+      paymentMethod: selectedPayment === 'online-gateway' ? 'پرداخت آنلاین شاپرک (موفق)' : 'پرداخت در محل',
+      trackingCode: postalCodeTracking,
+      giftWrap,
+      giftNote: giftWrap ? giftNote : null,
+      status: 'processing',
+      statusLabel: 'در حال بافت و بسته‌بندی معطر'
+    };
+
+    // Persist order to backend (Netlify Blobs in prod, JSON file in dev)
+    let saved;
+    try {
+      saved = await placeOrder(orderRecord);
+    } catch (err) {
+      setStep(2);
+      return; // Toast already shown by placeOrder
+    }
+
+    setTimeout(() => {
+      setConfirmedOrder(saved);
       clearCart();
       setStep(4);
 
@@ -144,9 +150,12 @@ export const CheckoutModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 text-right animate-in fade-in">
-      
-      <div className="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-3xl w-full overflow-hidden flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-6 text-right animate-in fade-in">
+
+      <div
+        className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl border border-pink-100 max-w-3xl w-full overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[92vh] animate-slide-up-mobile sm:animate-none"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-pink-100 bg-gradient-to-r from-pink-50/80 to-rose-50/40 flex items-center justify-between">
@@ -174,19 +183,21 @@ export const CheckoutModal = () => {
 
         {/* Progress Step Bar (Steps 1 & 2) */}
         {step < 3 && (
-          <div className="bg-slate-50 px-6 py-3 border-b border-pink-100 flex items-center justify-center gap-4 text-xs font-bold">
-            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-pink-600' : 'text-slate-400'}`}>
+          <div className="bg-slate-50 px-3 sm:px-6 py-3 border-b border-pink-100 flex items-center justify-center gap-2 sm:gap-4 text-[11px] sm:text-xs font-bold">
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${step >= 1 ? 'text-pink-600' : 'text-slate-400'}`}>
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 1 ? 'bg-pink-500 text-white' : 'bg-slate-200'}`}>
                 ۱
               </span>
-              <span>مشخصات و آدرس تحویل</span>
+              <span className="hidden xs:inline sm:inline">مشخصات و آدرس تحویل</span>
+              <span className="xs:hidden sm:hidden">آدرس</span>
             </div>
-            <span className="w-8 h-0.5 bg-slate-200" />
-            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-pink-600' : 'text-slate-400'}`}>
+            <span className="w-6 sm:w-8 h-0.5 bg-slate-200" />
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${step >= 2 ? 'text-pink-600' : 'text-slate-400'}`}>
               <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step >= 2 ? 'bg-pink-500 text-white' : 'bg-slate-200'}`}>
                 ۲
               </span>
-              <span>شیوه ارسال و پرداخت</span>
+              <span className="hidden xs:inline sm:inline">شیوه ارسال و پرداخت</span>
+              <span className="xs:hidden sm:hidden">ارسال و پرداخت</span>
             </div>
           </div>
         )}
@@ -454,11 +465,11 @@ export const CheckoutModal = () => {
               </div>
 
               {/* Buttons */}
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5"
+                  className="px-4 py-3 sm:py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5"
                 >
                   <ArrowRight className="w-3.5 h-3.5" />
                   <span>ویرایش آدرس</span>
@@ -467,10 +478,10 @@ export const CheckoutModal = () => {
                 <button
                   type="button"
                   onClick={handleProcessPayment}
-                  className="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600 hover:from-rose-600 hover:to-fuchsia-700 text-white px-8 py-3.5 rounded-2xl font-black text-xs sm:text-sm shadow-lg shadow-pink-300/50 flex items-center gap-2 transform active:scale-98"
+                  className="bg-gradient-to-r from-rose-500 via-pink-500 to-fuchsia-600 hover:from-rose-600 hover:to-fuchsia-700 text-white px-6 sm:px-8 py-3.5 rounded-2xl font-black text-xs sm:text-sm shadow-lg shadow-pink-300/50 flex items-center justify-center gap-2 transform active:scale-95"
                 >
-                  <Lock className="w-4 h-4" />
-                  <span>پرداخت امن و ثبت نهایی ({formatPrice(total)} تومان)</span>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  <span>پرداخت امن ({formatPrice(total)} ت)</span>
                 </button>
               </div>
             </div>

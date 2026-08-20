@@ -67,7 +67,7 @@ export const AdminDashboard = () => {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-white p-0.5 shadow-sm border border-pink-200 flex items-center justify-center">
                   <img
-                    src={storeSettings.logoUrl || '/images/logo.png'}
+                    src={storeSettings.logoUrl || '/images/logo-icon.png'}
                     alt="ابر صورتی"
                     className="w-full h-full object-contain"
                   />

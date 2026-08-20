@@ -116,7 +116,7 @@ export const Hero = () => {
               {/* Floating Badge 1: Top Right - Brand Logo Mini Badge */}
               <div className="absolute -top-4 -right-4 bg-white/95 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-pink-100 flex items-center gap-3 animate-float">
                 <img
-                  src="/images/logo.png"
+                  src="/images/logo-icon.png"
                   alt="لوگوی ابر صورتی"
                   className="w-10 h-10 object-contain rounded-xl"
                 />

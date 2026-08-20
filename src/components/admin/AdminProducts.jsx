@@ -232,8 +232,8 @@ export const AdminProducts = () => {
         </div>
       </div>
 
-      {/* 3. Products Table */}
-      <div className="bg-white rounded-3xl border border-pink-100/90 shadow-xs overflow-hidden">
+      {/* 3. Products Table (Desktop) */}
+      <div className="hidden md:block bg-white rounded-3xl border border-pink-100/90 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs">
             <thead className="bg-pink-50/60 text-slate-700 font-bold border-b border-pink-100">
@@ -328,10 +328,85 @@ export const AdminProducts = () => {
         </div>
       </div>
 
+      {/* 3b. Products Card List (Mobile) */}
+      <div className="md:hidden space-y-3">
+        {filteredList.length === 0 && (
+          <div className="bg-white rounded-2xl p-8 border border-pink-100 text-center text-xs text-slate-500">
+            محصولی مطابق فیلترها یافت نشد.
+          </div>
+        )}
+        {filteredList.map(prod => (
+          <div key={prod.id} className="bg-white rounded-2xl border border-pink-100 shadow-sm p-3 flex gap-3">
+            <img
+              src={prod.primaryImage}
+              alt={prod.name}
+              className="w-20 h-20 rounded-xl object-cover border border-pink-100 shrink-0"
+              onError={e => { e.currentTarget.style.opacity = '0.3'; }}
+            />
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-slate-900 text-xs leading-snug line-clamp-2">{prod.name}</h4>
+                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span className="text-[10px] bg-pink-50 text-pink-700 font-bold px-2 py-0.5 rounded-md border border-pink-200/60">
+                    {prod.categoryName}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
+                    prod.stockCount > 5
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : prod.stockCount > 0
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-rose-100 text-rose-800'
+                  }`}>
+                    {prod.stockCount > 0 ? `${prod.stockCount} موجود` : 'ناموجود'}
+                  </span>
+                  {prod.isFlashDeal && (
+                    <span className="bg-rose-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
+                      ⚡ ٪{prod.discountPercent}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono mt-1">SKU: {prod.sku || prod.id}</div>
+              </div>
+              <div className="flex items-end justify-between gap-2 mt-2">
+                <div>
+                  <div className="font-mono font-black text-rose-600 text-sm">
+                    {formatPrice(prod.price)} <span className="text-[10px] text-slate-500">ت</span>
+                  </div>
+                  {prod.originalPrice > prod.price && (
+                    <div className="text-[10px] text-slate-400 line-through font-mono">
+                      {formatPrice(prod.originalPrice)}
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => openEditModal(prod)}
+                    className="p-2 text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-lg transition"
+                    title="ویرایش"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(prod.id, prod.name)}
+                    className="p-2 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition"
+                    title="حذف"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* 4. Add / Edit Product Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 text-right animate-in fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 text-right animate-in fade-in">
+          <div
+            className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl border border-pink-100 max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto p-5 sm:p-8 animate-slide-up-mobile sm:animate-none"
+            style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+          >
             
             <div className="flex items-center justify-between pb-4 border-b border-pink-100 mb-6">
               <h3 className="text-base sm:text-lg font-black text-slate-900">

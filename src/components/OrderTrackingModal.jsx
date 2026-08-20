@@ -48,8 +48,11 @@ export const OrderTrackingModal = () => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 text-right animate-in fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 text-right animate-in fade-in">
+      <div
+        className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl border border-pink-100 max-w-2xl w-full overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] animate-slide-up-mobile sm:animate-none"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-pink-100 bg-gradient-to-r from-pink-50/80 to-white flex items-center justify-between">

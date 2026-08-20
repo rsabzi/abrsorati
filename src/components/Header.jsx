@@ -34,6 +34,7 @@ export const Header = () => {
     navigateToWishlist,
     navigateToAbout,
     navigateToAdmin,
+    isAdminAuthenticated,
     navigateToFlashDeals,
     setTrackingModalOpen,
     currentView,
@@ -88,20 +89,21 @@ export const Header = () => {
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-pink-100/80 shadow-xs transition-all">
       
       {/* 1. Top Announcement Bar */}
-      <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-fuchsia-600 text-white text-xs sm:text-sm py-2 px-4">
+      <div className="bg-gradient-to-r from-pink-600 via-rose-500 to-fuchsia-600 text-white text-xs sm:text-sm py-1.5 sm:py-2 px-3">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           
           {/* Coupon Promotion from settings */}
-          <div className="flex items-center gap-2 mx-auto sm:mx-0">
-            <span className="inline-flex items-center justify-center p-1 bg-white/20 rounded-full animate-pulse-subtle">
-              <Sparkles className="w-3.5 h-3.5 text-yellow-200" />
+          <div className="flex items-center gap-1.5 sm:gap-2 mx-auto sm:mx-0 min-w-0">
+            <span className="inline-flex items-center justify-center p-1 bg-white/20 rounded-full animate-pulse-subtle shrink-0">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-200" />
             </span>
-            <span className="font-medium text-xs sm:text-sm">
-              {storeSettings.announcementText || 'جشنواره افتتاحیه بوتیک ابر صورتی: ۱۵٪ تخفیف کل سفارش با کد:'}
+            <span className="font-medium text-[11px] sm:text-sm truncate">
+              <span className="hidden sm:inline">{storeSettings.announcementText || 'جشنواره افتتاحیه: ۱۵٪ تخفیف با کد'}</span>
+              <span className="sm:hidden">۱۵٪ تخفیف با کد:</span>
             </span>
             <button
               onClick={handleCopyCoupon}
-              className="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-2.5 py-0.5 rounded-full font-mono text-xs transition border border-white/30 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded-full font-mono text-[10px] sm:text-xs transition border border-white/30 active:scale-95 cursor-pointer shrink-0"
               title="برای کپی کد کلیک کنید"
             >
               <span className="font-bold">PINKCLOUD</span>
@@ -122,22 +124,26 @@ export const Header = () => {
             >
               پیگیری سفارشات
             </button>
-            <span className="text-pink-300">|</span>
-            <button
-              onClick={() => navigateToAdmin('overview')}
-              className="hover:text-yellow-200 font-bold flex items-center gap-1 text-white bg-white/20 px-2 py-0.5 rounded-md transition cursor-pointer"
-            >
-              <Settings className="w-3 h-3 text-yellow-200" />
-              <span>پنل مدیریت</span>
-            </button>
+            {isAdminAuthenticated && (
+              <>
+                <span className="text-pink-300">|</span>
+                <button
+                  onClick={() => navigateToAdmin('overview')}
+                  className="hover:text-yellow-200 font-bold flex items-center gap-1 text-white bg-white/20 px-2 py-0.5 rounded-md transition cursor-pointer"
+                >
+                  <Settings className="w-3 h-3 text-yellow-200" />
+                  <span>پنل مدیریت</span>
+                </button>
+              </>
+            )}
           </div>
 
         </div>
       </div>
 
       {/* 2. Main Header Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           
           {/* Hamburger Menu & Brand Logo */}
           <div className="flex items-center gap-3">
@@ -145,7 +151,7 @@ export const Header = () => {
             {/* Hamburger Button for Mobile & Tablet */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-2 text-slate-700 hover:text-pink-600 hover:bg-pink-50 rounded-xl transition cursor-pointer"
+              className="lg:hidden p-2 -mr-1 text-slate-700 hover:text-pink-600 hover:bg-pink-50 rounded-xl transition cursor-pointer"
               aria-label="منوی اصلی"
             >
               <Menu className="w-6 h-6" />
@@ -154,27 +160,27 @@ export const Header = () => {
             {/* Brand Logo with Official Image */}
             <button
               onClick={navigateToHome}
-              className="flex items-center gap-3 group text-right focus:outline-none cursor-pointer"
+              className="flex items-center gap-2 sm:gap-3 group text-right focus:outline-none cursor-pointer min-w-0"
             >
-              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-400 to-pink-300 p-0.5 shadow-md shadow-pink-200 group-hover:scale-105 transition-transform duration-300">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-400 to-pink-300 p-0.5 shadow-md shadow-pink-200 group-hover:scale-105 transition-transform duration-300">
                 <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center overflow-hidden p-1">
                   <img
-                    src={storeSettings.logoUrl || '/images/logo.png'}
+                    src={storeSettings.logoUrl || '/images/logo-icon.png'}
                     alt="ابر صورتی"
                     className="w-full h-full object-contain"
                   />
                 </div>
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-2xl font-black bg-gradient-to-l from-rose-600 via-pink-600 to-fuchsia-600 bg-clip-text text-transparent">
+                  <span className="text-lg sm:text-2xl font-black bg-gradient-to-l from-rose-600 via-pink-600 to-fuchsia-600 bg-clip-text text-transparent truncate">
                     {storeSettings.storeName || 'ابر صورتی'}
                   </span>
-                  <span className="text-[10px] bg-pink-100 text-pink-700 font-bold px-1.5 py-0.5 rounded-md">
+                  <span className="hidden sm:inline text-[10px] bg-pink-100 text-pink-700 font-bold px-1.5 py-0.5 rounded-md">
                     {storeSettings.domain || 'abrsorati.ir'}
                   </span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-medium tracking-wide">
+                <span className="hidden sm:block text-[11px] text-slate-500 font-medium tracking-wide truncate">
                   {storeSettings.tagline || 'لباس زیر زنانه، کراپ و اکسسوری فانتزی'}
                 </span>
               </div>
@@ -263,9 +269,18 @@ export const Header = () => {
             )}
           </div>
 
-          {/* Action Buttons: Tracking, Wishlist, Cart */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            
+          {/* Action Buttons: Search (mobile), Tracking, Wishlist, Cart */}
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+
+            {/* Mobile search icon (opens mobile menu drawer where full search lives) */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2.5 text-slate-700 hover:text-pink-600 hover:bg-pink-50 rounded-2xl transition cursor-pointer"
+              aria-label="جستجو"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             {/* Tracking Button */}
             <button
               onClick={() => setTrackingModalOpen(true)}
@@ -276,10 +291,10 @@ export const Header = () => {
               <span>پیگیری سفارش</span>
             </button>
 
-            {/* Wishlist Button */}
+            {/* Wishlist Button - hidden on mobile (in bottom nav) */}
             <button
               onClick={navigateToWishlist}
-              className="relative p-2.5 text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition border border-transparent hover:border-pink-100 cursor-pointer"
+              className="hidden md:inline-flex relative p-2.5 text-slate-700 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition border border-transparent hover:border-pink-100 cursor-pointer"
               title="لیست علاقه‌مندی‌ها"
               aria-label="لیست علاقه‌مندی‌ها"
             >
@@ -294,13 +309,13 @@ export const Header = () => {
             {/* Cart Button */}
             <button
               onClick={() => setCartDrawerOpen(true)}
-              className="flex items-center gap-3 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white px-4 py-2.5 rounded-2xl font-bold shadow-md shadow-pink-200 hover:shadow-lg hover:shadow-pink-300 transition-all duration-300 transform active:scale-95 group cursor-pointer"
+              className="flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-2xl font-bold shadow-md shadow-pink-200 hover:shadow-lg hover:shadow-pink-300 transition-all duration-300 transform active:scale-95 group cursor-pointer"
               aria-label="سبد خرید"
             >
               <div className="relative">
                 <ShoppingBag className="w-5 h-5 group-hover:rotate-12 transition-transform" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-yellow-300 text-rose-900 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute -top-2 -right-2 bg-yellow-300 text-rose-900 text-[10px] font-black min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-sm border border-white">
                     {totalItems}
                   </span>
                 )}

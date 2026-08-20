@@ -46,8 +46,11 @@ export const QuickViewModal = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 text-right animate-in fade-in">
-      <div className="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-2xl w-full overflow-hidden relative">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 text-right animate-in fade-in">
+      <div
+        className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl border border-pink-100 max-w-2xl w-full overflow-hidden relative max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-slide-up-mobile sm:animate-none"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         
         {/* Close Button */}
         <button

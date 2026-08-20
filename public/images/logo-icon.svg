@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="cloud" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FBCFE8"/>
+      <stop offset="100%" stop-color="#F9A8D4"/>
+    </linearGradient>
+    <linearGradient id="crown" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#DB2777"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#FFF" stroke="#FBCFE8" stroke-width="1.5"/>
+  <!-- Sparkles -->
+  <g fill="#F9A8D4">
+    <path d="M22 32 l1.5 3 3 1.5 -3 1.5 -1.5 3 -1.5 -3 -3 -1.5 3 -1.5z"/>
+    <path d="M78 32 l1.2 2.4 2.4 1.2 -2.4 1.2 -1.2 2.4 -1.2 -2.4 -2.4 -1.2 2.4 -1.2z"/>
+    <circle cx="30" cy="42" r="1.4"/>
+    <circle cx="72" cy="42" r="1.4"/>
+  </g>
+  <!-- Crown -->
+  <g transform="translate(50 25)">
+    <path d="M-11 8 L-11 -1 L-6 3 L-3 -6 L0 3 L3 -6 L6 3 L11 -1 L11 8 Z" fill="url(#crown)" stroke="#DB2777" stroke-width="0.5" stroke-linejoin="round"/>
+    <path d="M-1.5 4 a1.5 1.3 0 0 1 3 0 c0 1 -1.5 2 -1.5 2 s-1.5 -1 -1.5 -2z" fill="#FFF"/>
+    <circle cx="-6" cy="-3" r="1" fill="#FBCFE8"/>
+    <circle cx="0" cy="-8" r="1" fill="#FBCFE8"/>
+    <circle cx="6" cy="-3" r="1" fill="#FBCFE8"/>
+  </g>
+  <!-- Cloud body -->
+  <g transform="translate(50 65)">
+    <path d="M-26 4
+             a10 10 0 0 1 6 -14
+             a10 10 0 0 1 12 -6
+             a12 12 0 0 1 20 2
+             a10 10 0 0 1 12 6
+             a10 10 0 0 1 4 12
+             a8 8 0 0 1 -8 6
+             l-40 0
+             a8 8 0 0 1 -6 -6z" fill="url(#cloud)" stroke="#EC4899" stroke-width="1.2" stroke-linejoin="round"/>
+    <!-- Face: eyes -->
+    <g fill="#831843">
+      <circle cx="-7" cy="4" r="1.8"/>
+      <circle cx="7" cy="4" r="1.8"/>
+      <circle cx="-6.5" cy="3.5" r="0.6" fill="#FFF"/>
+      <circle cx="7.5" cy="3.5" r="0.6" fill="#FFF"/>
+    </g>
+    <!-- Blush -->
+    <ellipse cx="-13" cy="7" rx="2.5" ry="1.4" fill="#F9A8D4" opacity="0.7"/>
+    <ellipse cx="13" cy="7" rx="2.5" ry="1.4" fill="#F9A8D4" opacity="0.7"/>
+    <!-- Smile -->
+    <path d="M-3 8 q3 2.5 6 0" stroke="#831843" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

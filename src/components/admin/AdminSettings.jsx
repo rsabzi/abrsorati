@@ -1,15 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useShop } from '../../context/ShopContext';
-import { Settings, Save, Sparkles, Phone, MapPin, Globe, Image as ImageIcon, Truck } from 'lucide-react';
+import { Settings, Save, Sparkles, Phone, MapPin, Globe, Image as ImageIcon, Truck, Lock, Download, Upload, ShieldCheck, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 export const AdminSettings = () => {
-  const { storeSettings, updateStoreSettings, formatPrice } = useShop();
+  const { storeSettings, updateStoreSettings, formatPrice, changeAdminPassword, exportDatabase, importDatabase, adminUser, showToast } = useShop();
 
   const [formData, setFormData] = useState({ ...storeSettings });
+
+  const [pwdCurrent, setPwdCurrent] = useState('');
+  const [pwdNew, setPwdNew] = useState('');
+  const [pwdConfirm, setPwdConfirm] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [pwdSaving, setPwdSaving] = useState(false);
+
+  const fileInputRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     updateStoreSettings(formData);
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (pwdNew.length < 6) {
+      showToast('رمز جدید باید حداقل ۶ کاراکتر باشد', 'warning');
+      return;
+    }
+    if (pwdNew !== pwdConfirm) {
+      showToast('تکرار رمز جدید مطابقت ندارد', 'warning');
+      return;
+    }
+    setPwdSaving(true);
+    const ok = await changeAdminPassword(pwdCurrent, pwdNew);
+    setPwdSaving(false);
+    if (ok) {
+      setPwdCurrent(''); setPwdNew(''); setPwdConfirm('');
+    }
+  };
+
+  const handleImportFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!window.confirm('توجه: بازیابی پشتیبان، تمام داده‌های فعلی را جایگزین می‌کند. ادامه می‌دهید؟')) {
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        await importDatabase(data);
+      } catch (err) {
+        showToast('فایل پشتیبان معتبر نیست', 'error');
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -212,6 +258,122 @@ export const AdminSettings = () => {
         </div>
 
       </form>
+
+      {/* ============= SECURITY & BACKUP ============= */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-xs">
+
+        {/* Change Password */}
+        <form onSubmit={handlePasswordChange} className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <KeyRound className="w-4 h-4 text-pink-600" />
+            <span>تغییر رمز عبور مدیر</span>
+          </h4>
+
+          {adminUser && (
+            <p className="text-[11px] text-slate-500">
+              حساب فعلی: <span className="font-mono font-bold text-slate-700 dir-ltr">{adminUser.email}</span>
+            </p>
+          )}
+
+          <div>
+            <label className="block font-bold text-slate-700 mb-1">رمز عبور فعلی</label>
+            <div className="relative">
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={pwdCurrent}
+                onChange={(e) => setPwdCurrent(e.target.value)}
+                className="w-full bg-slate-50 rounded-xl p-3 pl-10 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+                required
+                autoComplete="current-password"
+              />
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">رمز جدید (حداقل ۶ کاراکتر)</label>
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={pwdNew}
+                onChange={(e) => setPwdNew(e.target.value)}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-slate-700 mb-1">تکرار رمز جدید</label>
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={pwdConfirm}
+                onChange={(e) => setPwdConfirm(e.target.value)}
+                className="w-full bg-slate-50 rounded-xl p-3 border border-slate-200 outline-none focus:bg-white focus:ring-2 focus:ring-pink-300"
+                required
+                minLength={6}
+                autoComplete="new-password"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={pwdSaving}
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white text-xs font-bold px-6 py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md transition"
+          >
+            <Lock className="w-4 h-4" />
+            <span>{pwdSaving ? 'در حال ذخیره...' : 'تغییر رمز عبور'}</span>
+          </button>
+        </form>
+
+        {/* Backup & Restore */}
+        <div className="bg-white rounded-3xl p-6 border border-pink-100/90 shadow-xs space-y-4">
+          <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 pb-2 border-b border-pink-50">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>پشتیبان‌گیری از دیتابیس</span>
+          </h4>
+
+          <p className="text-slate-600 leading-relaxed">
+            تمام محصولات، دسته‌ها، سفارشات، کدهای تخفیف، تنظیمات و کاربران به صورت یک فایل JSON قابل خروجی گرفتن و بازیابی هستند.
+            توصیه می‌شود هفتگی یک نسخه پشتیبان دانلود کنید.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <button
+              type="button"
+              onClick={exportDatabase}
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition"
+            >
+              <Download className="w-4 h-4" />
+              <span>دانلود فایل پشتیبان</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-3 rounded-xl flex items-center justify-center gap-2 shadow-md transition"
+            >
+              <Upload className="w-4 h-4" />
+              <span>بازیابی از فایل</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleImportFile}
+              className="hidden"
+            />
+          </div>
+
+          <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed">
+            💾 داده‌ها روی سرور Netlify Blobs ذخیره می‌شوند (به صورت JSON key-value). فایل خروجی یک اسنپ‌شات کامل از دیتابیس است.
+          </div>
+        </div>
+
+      </div>
 
     </div>
   );

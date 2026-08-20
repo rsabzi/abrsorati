@@ -80,7 +80,10 @@ export const CartDrawer = () => {
       />
 
       {/* Drawer Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300 text-right">
+      <div
+        className="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300 text-right"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)', paddingTop: 'env(safe-area-inset-top)' }}
+      >
         
         {/* Drawer Header */}
         <div className="p-4 sm:p-5 border-b border-pink-100 bg-gradient-to-r from-pink-50/70 to-white flex items-center justify-between">

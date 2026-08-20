@@ -92,8 +92,8 @@ export const AdminOrders = () => {
         </div>
       </div>
 
-      {/* 3. Orders Table */}
-      <div className="bg-white rounded-3xl border border-pink-100/90 shadow-xs overflow-hidden">
+      {/* 3. Orders Table (Desktop) */}
+      <div className="hidden md:block bg-white rounded-3xl border border-pink-100/90 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-right text-xs">
             <thead className="bg-pink-50/60 text-slate-700 font-bold border-b border-pink-100">
@@ -187,10 +187,88 @@ export const AdminOrders = () => {
         </div>
       </div>
 
+      {/* 3b. Orders Card List (Mobile) */}
+      <div className="md:hidden space-y-3">
+        {filteredOrders.length === 0 && (
+          <div className="bg-white rounded-2xl p-8 border border-pink-100 text-center text-xs text-slate-500">
+            سفارشی یافت نشد.
+          </div>
+        )}
+        {filteredOrders.map(order => (
+          <div key={order.id} className="bg-white rounded-2xl border border-pink-100 shadow-sm p-4 space-y-3">
+            <div className="flex items-start justify-between gap-2 pb-3 border-b border-pink-50">
+              <div className="min-w-0">
+                <div className="font-mono font-black text-pink-700 text-sm">{order.id}</div>
+                <div className="text-[10px] text-slate-400 mt-0.5">{order.date}</div>
+              </div>
+              <span className={`text-[10px] font-bold rounded-lg px-2 py-1 border ${statusColors[order.status] || 'bg-slate-100 text-slate-800 border-slate-200'} whitespace-nowrap`}>
+                {order.statusLabel || order.status}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span className="text-slate-400 block">مشتری:</span>
+                <span className="font-bold text-slate-800 block truncate">{order.customerName}</span>
+                <span className="font-mono dir-ltr text-slate-500 block">{order.phone}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 block">مبلغ:</span>
+                <span className="font-mono font-bold text-rose-600 block">{formatPrice(order.total)} ت</span>
+                <span className="text-slate-500 block">{order.itemsCount || 1} قلم</span>
+              </div>
+            </div>
+
+            <div className="text-[11px]">
+              <span className="text-slate-400 block mb-0.5">شیوه ارسال:</span>
+              <span className="text-slate-700">{order.shippingMethod || 'پست پیشتاز'}</span>
+            </div>
+
+            <select
+              value={order.status || 'processing'}
+              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+              className={`w-full text-xs font-bold rounded-xl px-3 py-2.5 border outline-none cursor-pointer ${
+                statusColors[order.status] || 'bg-slate-100 text-slate-800'
+              }`}
+            >
+              <option value="pending">در انتظار بررسی</option>
+              <option value="processing">در حال بسته‌بندی معطر</option>
+              <option value="shipped">تحویل به پست / در مسیر</option>
+              <option value="delivered">تحویل داده شده</option>
+              <option value="cancelled">لغو شده</option>
+            </select>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => setViewingOrder(order)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-pink-700 bg-pink-50 hover:bg-pink-100 rounded-xl transition"
+              >
+                <FileText className="w-4 h-4" />
+                <span>جزئیات فاکتور</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (window.confirm(`آیا از حذف سفارش ${order.id} مطمئن هستید؟`)) {
+                    deleteOrder(order.id);
+                  }
+                }}
+                className="p-2.5 text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition"
+                title="حذف سفارش"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* 4. Order Detail & Print Modal */}
       {viewingOrder && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 text-right animate-in fade-in">
-          <div className="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-2xl w-full p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center sm:p-4 text-right animate-in fade-in">
+          <div
+            className="bg-white sm:rounded-3xl rounded-t-3xl shadow-2xl border border-pink-100 max-w-2xl w-full p-5 sm:p-8 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto animate-slide-up-mobile sm:animate-none"
+            style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+          >
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-pink-100 mb-5">

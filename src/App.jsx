@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -19,6 +19,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { MobileMenuDrawer } from './components/MobileMenuDrawer';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { AdminLoginModal } from './components/AdminLoginModal';
+import { OrdersPage } from './components/OrdersPage';
 import { ProductCard } from './components/ProductCard';
 import { Sparkles, ArrowLeft, Heart, ShieldCheck, Settings } from 'lucide-react';
 
@@ -34,6 +35,25 @@ const MainShopContent = () => {
     setAdminLoginModalOpen,
     handleAdminLogin
   } = useShop();
+
+  // Backdoor: opening the site with #admin in the URL triggers admin login
+  useEffect(() => {
+    const check = () => {
+      if (window.location.hash === '#admin') {
+        if (isAdminAuthenticated) {
+          navigateToAdmin('overview');
+        } else {
+          setAdminLoginModalOpen(true);
+        }
+        // Clean hash so it doesn't stay in the URL
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdminAuthenticated]);
 
   const featuredBestsellers = products.filter(p => p.isFeatured).slice(0, 4);
 
@@ -51,7 +71,7 @@ const MainShopContent = () => {
     <div className="min-h-screen flex flex-col justify-between bg-[#FFF9FB]">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 mobile-nav-space">
         {/* HOME VIEW */}
         {currentView === 'home' && (
           <div>
@@ -121,7 +141,7 @@ const MainShopContent = () => {
 
                   <div className="w-full lg:w-96 rounded-2xl overflow-hidden shadow-lg border-2 border-pink-100 p-4 bg-pink-50 flex items-center justify-center">
                     <img
-                      src="/images/logo.png"
+                      src="/images/logo-icon.png"
                       alt="لوگوی ابر صورتی"
                       className="w-48 h-48 object-contain"
                     />
@@ -141,6 +161,9 @@ const MainShopContent = () => {
         {/* WISHLIST VIEW */}
         {currentView === 'wishlist' && <WishlistModal />}
 
+        {/* ORDERS VIEW */}
+        {currentView === 'orders' && <OrdersPage />}
+
         {/* ABOUT VIEW */}
         {currentView === 'about' && <AboutStory />}
       </main>
@@ -149,14 +172,17 @@ const MainShopContent = () => {
 
       {/* Floating Admin Mode Switch Button for Authenticated Store Owner ONLY */}
       {isAdminAuthenticated && (
-        <div className="fixed bottom-20 sm:bottom-6 right-4 z-40">
+        <div
+          className="fixed right-4 z-40 bottom-24 md:bottom-6"
+          style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+        >
           <button
             onClick={() => navigateToAdmin('overview')}
-            className="bg-slate-900/90 hover:bg-slate-900 text-white p-3 sm:px-4 sm:py-2.5 rounded-2xl font-bold text-xs shadow-xl backdrop-blur-md border border-slate-700/80 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer group"
+            className="bg-slate-900/95 hover:bg-slate-900 text-white p-3 md:px-4 md:py-2.5 rounded-2xl font-bold text-xs shadow-xl backdrop-blur-md border border-slate-700/80 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 cursor-pointer group"
             title="ورود به پنل مدیریت فروشگاه"
           >
             <Settings className="w-4 h-4 text-pink-400 group-hover:rotate-90 transition-transform duration-300" />
-            <span className="hidden sm:inline">پنل مدیریت</span>
+            <span className="hidden md:inline">پنل مدیریت</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </button>
         </div>
@@ -167,6 +193,7 @@ const MainShopContent = () => {
         isOpen={adminLoginModalOpen}
         isAuthenticated={isAdminAuthenticated}
         onLoginSuccess={handleAdminLogin}
+        onClose={() => setAdminLoginModalOpen(false)}
       />
 
       {/* Global Slide-out Drawers & Modals */}
