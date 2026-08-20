@@ -17,7 +17,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 6,
     isFeatured: true,
-    badge: 'پرفروش‌ترین ماه',
+    badge: 'پرفروش',
     badgeColor: 'bg-rose-500',
     primaryImage: '/images/products/crop-macaron-1.jpg',
     gallery: [
@@ -93,7 +93,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 8,
     isFeatured: true,
-    badge: 'پرفروش‌ترین پک زیرپوش',
+    badge: 'پرفروش پک',
     badgeColor: 'bg-pink-600',
     primaryImage: '/images/products/panties-seamless-1.jpg',
     gallery: [
@@ -155,7 +155,7 @@ export const PRODUCTS = [
     stockCount: 15,
     isFlashDeal: false,
     isFeatured: true,
-    badge: 'بسیار کیوت و ترند',
+    badge: 'کیوت و ترند',
     badgeColor: 'bg-amber-500',
     primaryImage: '/images/products/socks-bear-1.jpg',
     gallery: [
@@ -210,7 +210,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 4,
     isFeatured: true,
-    badge: 'محافظ سلامت مو',
+    badge: 'سلامت مو',
     badgeColor: 'bg-emerald-600',
     primaryImage: '/images/products/scrunchie-silk-1.jpg',
     gallery: [
@@ -266,7 +266,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 10,
     isFeatured: true,
-    badge: 'ترند استایل دخترانه',
+    badge: 'ترند دخترانه',
     badgeColor: 'bg-violet-600',
     primaryImage: '/images/products/miniscarf-silk-1.jpg',
     gallery: [
@@ -323,7 +323,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 12,
     isFeatured: true,
-    badge: 'پک اقتصادی محبوب',
+    badge: 'پک اقتصادی',
     badgeColor: 'bg-rose-600',
     primaryImage: '/images/products/crop-macaron-set-1.jpg',
     gallery: [
@@ -377,7 +377,7 @@ export const PRODUCTS = [
     stockCount: 14,
     isFlashDeal: false,
     isFeatured: true,
-    badge: 'طراحی رمانتیک',
+    badge: 'رمانتیک',
     badgeColor: 'bg-rose-500',
     primaryImage: '/images/products/panties-ribbed-1.jpg',
     gallery: [
@@ -433,7 +433,7 @@ export const PRODUCTS = [
     stockCount: 11,
     isFlashDeal: false,
     isFeatured: true,
-    badge: 'استایل پرنسسی و مهمانی',
+    badge: 'پرنسسی',
     badgeColor: 'bg-fuchsia-600',
     primaryImage: '/images/products/socks-lace-1.jpg',
     gallery: [
@@ -487,7 +487,7 @@ export const PRODUCTS = [
     stockCount: 16,
     isFlashDeal: false,
     isFeatured: false,
-    badge: 'اکسسوری مو خاص',
+    badge: 'اکسسوری مو',
     badgeColor: 'bg-rose-500',
     primaryImage: '/images/products/scrunchie-bow-1.jpg',
     gallery: [
@@ -543,7 +543,7 @@ export const PRODUCTS = [
     isFlashDeal: true,
     flashDealEndHours: 14,
     isFeatured: true,
-    badge: 'کامل‌ترین ست کادویی',
+    badge: 'ست کادویی',
     badgeColor: 'bg-gradient-to-r from-pink-500 to-rose-600',
     primaryImage: '/images/hero/hero-lingerie-banner.jpg',
     gallery: [
@@ -597,7 +597,7 @@ export const PRODUCTS = [
     stockCount: 9,
     isFlashDeal: false,
     isFeatured: false,
-    badge: 'طراحی کلاسیک لوکس',
+    badge: 'کلاسیک لوکس',
     badgeColor: 'bg-slate-800',
     primaryImage: '/images/products/miniscarf-silk-1.jpg',
     gallery: [

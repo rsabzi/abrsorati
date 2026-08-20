@@ -175,9 +175,9 @@ export const ProductDetailPage = () => {
                 {/* Badge if available */}
                 {product.badge && (
                   <div className="absolute top-4 right-4">
-                    <span className={`${product.badgeColor || 'bg-rose-500'} text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1`}>
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{product.badge}</span>
+                    <span className={`${product.badgeColor || 'bg-rose-500'} text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-md flex items-center gap-1 whitespace-nowrap`}>
+                      <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate max-w-[8rem]">{product.badge}</span>
                     </span>
                   </div>
                 )}
@@ -377,14 +377,15 @@ export const ProductDetailPage = () => {
                 </div>
 
                 {/* Quantity, Add to Cart & Buy Now Action Controls */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
+                <div className="space-y-3 w-full min-w-0">
+                  {/* Row 1: Quantity + Wishlist + Share */}
+                  <div className="flex items-center gap-3 w-full min-w-0">
                     
                     {/* Quantity Counter */}
-                    <div className="flex items-center bg-slate-100 rounded-2xl p-1 border border-slate-200">
+                    <div className="flex items-center bg-slate-100 rounded-2xl p-1 border border-slate-200 shrink-0 min-w-0">
                       <button
                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                        className="w-9 h-9 rounded-xl bg-white text-slate-700 font-bold hover:bg-pink-50 hover:text-pink-600 flex items-center justify-center transition cursor-pointer"
+                        className="w-9 h-9 rounded-xl bg-white text-slate-700 font-bold hover:bg-pink-50 hover:text-pink-600 flex items-center justify-center transition cursor-pointer shrink-0"
                         aria-label="کاهش تعداد"
                       >
                         -
@@ -394,52 +395,52 @@ export const ProductDetailPage = () => {
                       </span>
                       <button
                         onClick={() => setQuantity(q => q + 1)}
-                        className="w-9 h-9 rounded-xl bg-white text-slate-700 font-bold hover:bg-pink-50 hover:text-pink-600 flex items-center justify-center transition cursor-pointer"
+                        className="w-9 h-9 rounded-xl bg-white text-slate-700 font-bold hover:bg-pink-50 hover:text-pink-600 flex items-center justify-center transition cursor-pointer shrink-0"
                         aria-label="افزایش تعداد"
                       >
                         +
                       </button>
                     </div>
 
-                    {/* Primary Add to Cart Button */}
-                    <button
-                      onClick={handleAddToCart}
-                      className="flex-1 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base shadow-lg shadow-pink-300/50 hover:shadow-xl hover:shadow-pink-400/60 transition-all flex items-center justify-center gap-2 transform active:scale-98 cursor-pointer"
-                    >
-                      <ShoppingBag className="w-5 h-5" />
-                      <span>افزودن به سبد خرید</span>
-                    </button>
-
                     {/* Wishlist Heart Button */}
                     <button
                       onClick={() => toggleWishlist(product.id)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer shrink-0 min-w-0 ${
                         isSaved
                           ? 'bg-rose-500 text-white border-rose-500'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-pink-50 hover:text-rose-600'
                       }`}
                       title={isSaved ? 'حذف از علاقه‌مندی‌ها' : 'افزودن به علاقه‌مندی‌ها'}
                     >
-                      <Heart className={`w-5 h-5 ${isSaved ? 'fill-white' : ''}`} />
+                      <Heart className={`w-5 h-5 shrink-0 ${isSaved ? 'fill-white' : ''}`} />
                     </button>
 
                     {/* Share Button */}
                     <button
                       onClick={handleShare}
-                      className="p-3.5 rounded-2xl bg-white text-slate-700 border border-slate-200 hover:bg-pink-50 hover:text-pink-600 transition cursor-pointer"
+                      className="p-3.5 rounded-2xl bg-white text-slate-700 border border-slate-200 hover:bg-pink-50 hover:text-pink-600 transition cursor-pointer shrink-0 min-w-0"
                       title="اشتراک‌گذاری محصول"
                     >
-                      <Share2 className="w-5 h-5" />
+                      <Share2 className="w-5 h-5 shrink-0" />
                     </button>
                   </div>
 
-                  {/* Buy Now Direct Button */}
+                  {/* Row 2: Add to Cart (full width) */}
+                  <button
+                    onClick={handleAddToCart}
+                    className="w-full min-w-0 bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base shadow-lg shadow-pink-300/50 hover:shadow-xl hover:shadow-pink-400/60 transition-all flex items-center justify-center gap-2 transform active:scale-98 cursor-pointer"
+                  >
+                    <ShoppingBag className="w-5 h-5 shrink-0" />
+                    <span className="truncate">افزودن به سبد خرید</span>
+                  </button>
+
+                  {/* Row 3: Buy Now Direct Button */}
                   <button
                     onClick={handleBuyNow}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 px-6 rounded-2xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full min-w-0 bg-slate-900 hover:bg-slate-800 text-white py-3 px-6 rounded-2xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    <Zap className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    <span>خرید سریع و آنی (ورود مستقیم به تسویه حساب)</span>
+                    <Zap className="w-4 h-4 shrink-0 text-yellow-400 fill-yellow-400" />
+                    <span className="truncate">خرید سریع و آنی (ورود مستقیم به تسویه حساب)</span>
                   </button>
                 </div>
 
