@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ShopProvider, useShop } from './context/ShopContext';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -35,6 +35,25 @@ const MainShopContent = () => {
     setAdminLoginModalOpen,
     handleAdminLogin
   } = useShop();
+
+  // Backdoor: opening the site with #admin in the URL triggers admin login
+  useEffect(() => {
+    const check = () => {
+      if (window.location.hash === '#admin') {
+        if (isAdminAuthenticated) {
+          navigateToAdmin('overview');
+        } else {
+          setAdminLoginModalOpen(true);
+        }
+        // Clean hash so it doesn't stay in the URL
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdminAuthenticated]);
 
   const featuredBestsellers = products.filter(p => p.isFeatured).slice(0, 4);
 
@@ -122,7 +141,7 @@ const MainShopContent = () => {
 
                   <div className="w-full lg:w-96 rounded-2xl overflow-hidden shadow-lg border-2 border-pink-100 p-4 bg-pink-50 flex items-center justify-center">
                     <img
-                      src="/images/logo.png"
+                      src="/images/logo-icon.png"
                       alt="لوگوی ابر صورتی"
                       className="w-48 h-48 object-contain"
                     />
@@ -174,6 +193,7 @@ const MainShopContent = () => {
         isOpen={adminLoginModalOpen}
         isAuthenticated={isAdminAuthenticated}
         onLoginSuccess={handleAdminLogin}
+        onClose={() => setAdminLoginModalOpen(false)}
       />
 
       {/* Global Slide-out Drawers & Modals */}

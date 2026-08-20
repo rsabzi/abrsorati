@@ -34,6 +34,7 @@ export const Header = () => {
     navigateToWishlist,
     navigateToAbout,
     navigateToAdmin,
+    isAdminAuthenticated,
     navigateToFlashDeals,
     setTrackingModalOpen,
     currentView,
@@ -123,14 +124,18 @@ export const Header = () => {
             >
               پیگیری سفارشات
             </button>
-            <span className="text-pink-300">|</span>
-            <button
-              onClick={() => navigateToAdmin('overview')}
-              className="hover:text-yellow-200 font-bold flex items-center gap-1 text-white bg-white/20 px-2 py-0.5 rounded-md transition cursor-pointer"
-            >
-              <Settings className="w-3 h-3 text-yellow-200" />
-              <span>پنل مدیریت</span>
-            </button>
+            {isAdminAuthenticated && (
+              <>
+                <span className="text-pink-300">|</span>
+                <button
+                  onClick={() => navigateToAdmin('overview')}
+                  className="hover:text-yellow-200 font-bold flex items-center gap-1 text-white bg-white/20 px-2 py-0.5 rounded-md transition cursor-pointer"
+                >
+                  <Settings className="w-3 h-3 text-yellow-200" />
+                  <span>پنل مدیریت</span>
+                </button>
+              </>
+            )}
           </div>
 
         </div>
@@ -160,7 +165,7 @@ export const Header = () => {
               <div className="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-400 to-pink-300 p-0.5 shadow-md shadow-pink-200 group-hover:scale-105 transition-transform duration-300">
                 <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center overflow-hidden p-1">
                   <img
-                    src={storeSettings.logoUrl || '/images/logo.png'}
+                    src={storeSettings.logoUrl || '/images/logo-icon.png'}
                     alt="ابر صورتی"
                     className="w-full h-full object-contain"
                   />

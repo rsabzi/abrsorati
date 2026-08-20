@@ -38,7 +38,7 @@ export const CheckoutModal = () => {
     getShippingCost,
     getCartTotal,
     formatPrice,
-    setOrders,
+    placeOrder,
     showToast,
     navigateToHome
   } = useShop();
@@ -81,39 +81,45 @@ export const CheckoutModal = () => {
     setStep(2);
   };
 
-  const handleProcessPayment = () => {
+  const handleProcessPayment = async () => {
     setStep(3); // Show processing spinner
 
-    setTimeout(() => {
-      // Generate order record
-      const newOrderNumber = 'AS-' + Math.floor(100000 + Math.random() * 900000);
-      const postalCodeTracking = '3948' + Math.floor(100000000000 + Math.random() * 900000000000);
-      
-      const orderRecord = {
-        id: newOrderNumber,
-        date: new Date().toLocaleDateString('fa-IR'),
-        items: [...cart],
-        itemsCount: cart.reduce((c, i) => c + i.quantity, 0),
-        subtotal,
-        discount,
-        giftCost,
-        shippingCost,
-        total,
-        customerName: formData.fullName,
-        phone: formData.phone,
-        address: `${formData.province}، ${formData.city}، ${formData.address}`,
-        postalCode: formData.postalCode,
-        shippingMethod: SHIPPING_METHODS.find(m => m.id === selectedShipping)?.name || 'پست پیشتاز',
-        paymentMethod: selectedPayment === 'online-gateway' ? 'پرداخت آنلاین شاپرک (موفق)' : 'پرداخت در محل',
-        trackingCode: postalCodeTracking,
-        giftWrap,
-        giftNote: giftWrap ? giftNote : null,
-        status: 'processing',
-        statusLabel: 'در حال بافت و بسته‌بندی معطر'
-      };
+    const postalCodeTracking = '3948' + Math.floor(100000000000 + Math.random() * 900000000000);
 
-      setConfirmedOrder(orderRecord);
-      setOrders(prev => [orderRecord, ...prev]);
+    const orderRecord = {
+      date: new Date().toLocaleDateString('fa-IR'),
+      createdAt: new Date().toISOString(),
+      items: [...cart],
+      itemsCount: cart.reduce((c, i) => c + i.quantity, 0),
+      subtotal,
+      discount,
+      giftCost,
+      shippingCost,
+      total,
+      customerName: formData.fullName,
+      phone: formData.phone,
+      address: `${formData.province}، ${formData.city}، ${formData.address}`,
+      postalCode: formData.postalCode,
+      shippingMethod: SHIPPING_METHODS.find(m => m.id === selectedShipping)?.name || 'پست پیشتاز',
+      paymentMethod: selectedPayment === 'online-gateway' ? 'پرداخت آنلاین شاپرک (موفق)' : 'پرداخت در محل',
+      trackingCode: postalCodeTracking,
+      giftWrap,
+      giftNote: giftWrap ? giftNote : null,
+      status: 'processing',
+      statusLabel: 'در حال بافت و بسته‌بندی معطر'
+    };
+
+    // Persist order to backend (Netlify Blobs in prod, JSON file in dev)
+    let saved;
+    try {
+      saved = await placeOrder(orderRecord);
+    } catch (err) {
+      setStep(2);
+      return; // Toast already shown by placeOrder
+    }
+
+    setTimeout(() => {
+      setConfirmedOrder(saved);
       clearCart();
       setStep(4);
 

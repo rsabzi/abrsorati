@@ -30,10 +30,21 @@ export const Footer = () => {
     navigateToHome,
     navigateToAbout,
     setTrackingModalOpen,
+    navigateToAdmin,
+    isAdminAuthenticated,
+    setAdminLoginModalOpen,
     showToast
   } = useShop();
 
   const [newsletterEmail, setNewsletterEmail] = useState('');
+
+  const openAdmin = () => {
+    if (isAdminAuthenticated) {
+      navigateToAdmin('overview');
+    } else {
+      setAdminLoginModalOpen(true);
+    }
+  };
 
   const handleNewsletter = (e) => {
     e.preventDefault();
@@ -97,7 +108,7 @@ export const Footer = () => {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-white p-1 shadow-md flex items-center justify-center">
                 <img
-                  src="/images/logo.png"
+                  src="/images/logo-icon.png"
                   alt="ابر صورتی"
                   className="w-full h-full object-contain"
                 />
@@ -235,6 +246,17 @@ export const Footer = () => {
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
             <span>برای حس لطافت و زیبایی شما</span>
           </div>
+        </div>
+
+        {/* Tiny hidden admin link */}
+        <div className="pt-3 text-center">
+          <button
+            onClick={openAdmin}
+            className="text-[10px] text-slate-600 hover:text-pink-400 transition-colors tracking-wide"
+            title="ورود مدیر فروشگاه"
+          >
+            · ورود مدیر ·
+          </button>
         </div>
 
       </div>

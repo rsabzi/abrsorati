@@ -33,6 +33,7 @@ export const MobileMenuDrawer = () => {
     navigateToAbout,
     navigateToWishlist,
     navigateToAdmin,
+    isAdminAuthenticated,
     navigateToFlashDeals,
     setTrackingModalOpen,
     showToast
@@ -62,7 +63,7 @@ export const MobileMenuDrawer = () => {
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-white p-0.5 shadow-md shadow-pink-200 border border-pink-100 flex items-center justify-center">
               <img
-                src={storeSettings.logoUrl || '/images/logo.png'}
+                src={storeSettings.logoUrl || '/images/logo-icon.png'}
                 alt="ابر صورتی"
                 className="w-full h-full object-contain"
               />
@@ -213,20 +214,22 @@ export const MobileMenuDrawer = () => {
             </div>
 
             <div className="space-y-1">
-              {/* Admin Portal Shortcut */}
-              <button
-                onClick={() => {
-                  navigateToAdmin('overview');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full text-right p-3 rounded-2xl bg-slate-900 text-white font-bold transition flex items-center justify-between text-xs cursor-pointer shadow-md"
-              >
-                <span className="flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-pink-400" />
-                  <span>ورود به پنل داشبورد مدیریت</span>
-                </span>
-                <span className="text-[10px] bg-pink-600 text-white px-2 py-0.5 rounded-md font-bold">ادمین</span>
-              </button>
+              {/* Admin Portal Shortcut (only for authenticated admins) */}
+              {isAdminAuthenticated && (
+                <button
+                  onClick={() => {
+                    navigateToAdmin('overview');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full text-right p-3 rounded-2xl bg-slate-900 text-white font-bold transition flex items-center justify-between text-xs cursor-pointer shadow-md"
+                >
+                  <span className="flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-pink-400" />
+                    <span>ورود به پنل داشبورد مدیریت</span>
+                  </span>
+                  <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-md font-bold">فعال</span>
+                </button>
+              )}
 
               {/* Story */}
               <button

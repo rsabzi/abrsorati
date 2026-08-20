@@ -53,7 +53,7 @@ export const AboutStory = () => {
           <div className="lg:col-span-5 relative">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-pink-50 bg-white p-6 flex flex-col items-center justify-center text-center">
               <img
-                src="/images/logo.png"
+                src="/images/logo-icon.png"
                 alt="لوگوی رسمی ابر صورتی"
                 className="w-48 h-48 object-contain mb-4"
               />

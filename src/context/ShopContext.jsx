@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { PRODUCTS as INITIAL_PRODUCTS, VALID_COUPONS as INITIAL_COUPONS, SHIPPING_METHODS } from '../data/products';
 import { CATEGORIES as INITIAL_CATEGORIES } from '../data/categories';
+import * as api from '../lib/api';
 
 const ShopContext = createContext();
 
@@ -39,7 +40,15 @@ export const ShopProvider = ({ children }) => {
   const [storeSettings, setStoreSettings] = useState(() => {
     try {
       const saved = localStorage.getItem('abr_soorati_settings_v3');
-      return saved ? JSON.parse(saved) : {
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Migrate old logo path to new logo icon
+        if (parsed.logoUrl === '/images/logo.png') {
+          parsed.logoUrl = '/images/logo-icon.png';
+        }
+        return parsed;
+      }
+      return {
         storeName: 'ابر صورتی',
         domain: 'abrsorati.ir',
         tagline: 'فروشگاه تخصصی لباس زیر زنانه، کراپ بند ماکارون، شورت، جوراب، کش مو و مینی اسکارف',
@@ -51,7 +60,7 @@ export const ShopProvider = ({ children }) => {
         freeShippingThreshold: 600000,
         heroHeadline: 'حس لطافت و آرامش با ابر صورتی | لباس زیر، کراپ و اکسسوری',
         heroSubtext: 'به دنیای اختصاصی «ابر صورتی» (abrsorati.ir) خوش آمدید! برترین مرکز تخصصی کراپ‌های بند ماکارون، شورت‌های لیزری بدون درز فاق پنبه، جوراب‌های فانتزی مچی، اسکرانچی‌های ابریشم خالص و مینی اسکارف‌های ترند با بسته‌بندی معطر روبانی.',
-        logoUrl: '/images/logo.png',
+        logoUrl: '/images/logo-icon.png',
         heroImageUrl: '/images/hero/hero-lingerie-banner.jpg'
       };
     } catch (e) {
@@ -154,38 +163,14 @@ export const ShopProvider = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
 
-  // Admin Authentication
+  // Admin Authentication — token-based, server-verified
   const [adminLoginModalOpen, setAdminLoginModalOpen] = useState(false);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(() => {
-    try {
-      const saved = localStorage.getItem('abr_soorati_admin_auth_v3');
-      if (saved) {
-        const auth = JSON.parse(saved);
-        // Session expires after 12 hours
-        if (Date.now() - auth.timestamp < 12 * 60 * 60 * 1000) {
-          return true;
-        }
-        localStorage.removeItem('abr_soorati_admin_auth_v3');
-      }
-      return false;
-    } catch (e) {
-      return false;
-    }
-  });
-  const [adminUser, setAdminUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('abr_soorati_admin_auth_v3');
-      if (saved) {
-        const auth = JSON.parse(saved);
-        if (Date.now() - auth.timestamp < 12 * 60 * 60 * 1000) {
-          return auth.user;
-        }
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  });
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(!!api.getToken());
+  const [adminUser, setAdminUser] = useState(null);
+
+  // Loading state for initial data fetch
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiOnline, setApiOnline] = useState(true);
 
   // Filters and search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -209,48 +194,79 @@ export const ShopProvider = ({ children }) => {
   // Toast Notifications
   const [toasts, setToasts] = useState([]);
 
-  // Save to LocalStorage
+  // Persist local-only state (cart, wishlist) to localStorage.
+  // Products, categories, coupons, settings and orders live on the server.
   useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_products_v3', JSON.stringify(products));
-    } catch (e) {}
-  }, [products]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_categories_v3', JSON.stringify(categories));
-    } catch (e) {}
-  }, [categories]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_coupons_v3', JSON.stringify(coupons));
-    } catch (e) {}
-  }, [coupons]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_settings_v3', JSON.stringify(storeSettings));
-    } catch (e) {}
-  }, [storeSettings]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_cart_v3', JSON.stringify(cart));
-    } catch (e) {}
+    try { localStorage.setItem('abr_soorati_cart_v3', JSON.stringify(cart)); } catch (e) {}
   }, [cart]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_wishlist_v3', JSON.stringify(wishlist));
-    } catch (e) {}
+    try { localStorage.setItem('abr_soorati_wishlist_v3', JSON.stringify(wishlist)); } catch (e) {}
   }, [wishlist]);
 
+  // ============ INITIAL LOAD FROM API ============
   useEffect(() => {
-    try {
-      localStorage.setItem('abr_soorati_orders_v3', JSON.stringify(orders));
-    } catch (e) {}
-  }, [orders]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const [p, c, cp, s] = await Promise.all([
+          api.db.list('products'),
+          api.db.list('categories'),
+          api.db.list('coupons'),
+          api.db.getSettings()
+        ]);
+        if (cancelled) return;
+        if (Array.isArray(p) && p.length > 0) setProducts(p);
+        if (Array.isArray(c) && c.length > 0) setCategories(c);
+        if (Array.isArray(cp)) setCoupons(cp);
+        if (s && typeof s === 'object') setStoreSettings(prev => ({ ...prev, ...s }));
+        setApiOnline(true);
+      } catch (err) {
+        console.warn('[shop] failed to load from API, using local defaults:', err.message);
+        setApiOnline(false);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Verify admin session on mount / when token changes, and load orders when authed.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = api.getToken();
+      if (!token) {
+        setIsAdminAuthenticated(false);
+        setAdminUser(null);
+        return;
+      }
+      try {
+        const { user } = await api.auth.me();
+        if (cancelled) return;
+        if (user) {
+          setIsAdminAuthenticated(true);
+          setAdminUser(user);
+          // Load orders (admin-only)
+          try {
+            const o = await api.db.list('orders');
+            if (Array.isArray(o)) setOrders(o);
+          } catch (e) { /* ignore */ }
+        } else {
+          api.setToken(null);
+          setIsAdminAuthenticated(false);
+          setAdminUser(null);
+        }
+      } catch (err) {
+        if (err.status === 401) {
+          api.setToken(null);
+          setIsAdminAuthenticated(false);
+          setAdminUser(null);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isAdminAuthenticated]);
 
   // Toast Trigger
   const showToast = (message, type = 'success', duration = 3500) => {
@@ -266,12 +282,16 @@ export const ShopProvider = ({ children }) => {
   };
 
   // --- ADMIN PRODUCT CRUD OPERATIONS ---
-  const addProduct = (newProd) => {
-    const id = 'p' + (Date.now() % 100000);
-    const sku = 'AS-' + (newProd.category?.toUpperCase() || 'PROD') + '-' + Math.floor(10 + Math.random() * 90);
+  // Helper for API errors
+  const handleApiError = (err, defaultMsg) => {
+    console.error('[shop] API error:', err);
+    showToast(err.message || defaultMsg || 'خطای ارتباط با سرور', 'error');
+  };
+
+  const addProduct = async (newProd) => {
+    const sku = newProd.sku || ('AS-' + (newProd.category?.toUpperCase() || 'PROD') + '-' + Math.floor(10 + Math.random() * 90));
     const fullProd = {
       ...newProd,
-      id,
       sku,
       rating: newProd.rating || 5.0,
       reviewsCount: newProd.reviewsCount || 0,
@@ -280,56 +300,95 @@ export const ShopProvider = ({ children }) => {
       gallery: newProd.gallery?.length ? newProd.gallery : [newProd.primaryImage],
       reviews: []
     };
-    setProducts(prev => [fullProd, ...prev]);
-    showToast(`محصول جدید «${fullProd.name}» با موفقیت افزوده شد! ✨`, 'success');
-    return fullProd;
+    try {
+      const created = await api.db.create('products', fullProd);
+      setProducts(prev => [created, ...prev]);
+      showToast(`محصول جدید «${created.name}» با موفقیت افزوده شد! ✨`, 'success');
+      return created;
+    } catch (err) {
+      handleApiError(err, 'خطا در افزودن محصول');
+      return null;
+    }
   };
 
-  const updateProduct = (id, updatedData) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updatedData } : p));
-    showToast(`اطلاعات محصول با موفقیت به‌روزرسانی شد. ✓`, 'success');
+  const updateProduct = async (id, updatedData) => {
+    try {
+      const updated = await api.db.update('products', id, updatedData);
+      setProducts(prev => prev.map(p => p.id === id ? updated : p));
+      showToast('اطلاعات محصول با موفقیت به‌روزرسانی شد. ✓', 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در به‌روزرسانی محصول');
+    }
   };
 
-  const deleteProduct = (id) => {
+  const deleteProduct = async (id) => {
     const prod = products.find(p => p.id === id);
-    setProducts(prev => prev.filter(p => p.id !== id));
-    // Also remove from cart and wishlist if present
-    setCart(prev => prev.filter(item => item.id !== id));
-    setWishlist(prev => prev.filter(wId => wId !== id));
-    showToast(`محصول «${prod?.name || id}» حذف شد.`, 'info');
+    try {
+      await api.db.remove('products', id);
+      setProducts(prev => prev.filter(p => p.id !== id));
+      setCart(prev => prev.filter(item => item.id !== id));
+      setWishlist(prev => prev.filter(wId => wId !== id));
+      showToast(`محصول «${prod?.name || id}» حذف شد.`, 'info');
+    } catch (err) {
+      handleApiError(err, 'خطا در حذف محصول');
+    }
   };
 
-  const resetProductsToDefault = () => {
-    setProducts(INITIAL_PRODUCTS);
-    setCategories(INITIAL_CATEGORIES);
-    setCoupons(INITIAL_COUPONS);
-    showToast('تمامی محصولات و دسته‌بندی‌ها به حالت پیش‌فرض اولیه بازگردانده شدند.', 'info');
+  const resetProductsToDefault = async () => {
+    try {
+      const [p, c, cp] = await Promise.all([
+        api.db.replaceAll('products', INITIAL_PRODUCTS),
+        api.db.replaceAll('categories', INITIAL_CATEGORIES),
+        api.db.replaceAll('coupons', INITIAL_COUPONS)
+      ]);
+      setProducts(p);
+      setCategories(c);
+      setCoupons(cp);
+      showToast('محصولات و دسته‌بندی‌ها به حالت پیش‌فرض بازگردانده شدند.', 'info');
+    } catch (err) {
+      handleApiError(err, 'خطا در بازنشانی داده‌ها');
+    }
   };
 
-  // --- ADMIN CATEGORY CRUD OPERATIONS ---
-  const addCategory = (cat) => {
+  // --- ADMIN CATEGORY CRUD ---
+  const addCategory = async (cat) => {
     const id = cat.id || 'cat-' + Date.now();
     const fullCat = { ...cat, id, count: cat.count || 0 };
-    setCategories(prev => [...prev, fullCat]);
-    showToast(`دسته‌بندی «${fullCat.name}» افزوده شد.`, 'success');
+    try {
+      const created = await api.db.create('categories', fullCat);
+      setCategories(prev => [...prev, created]);
+      showToast(`دسته‌بندی «${created.name}» افزوده شد.`, 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در افزودن دسته');
+    }
   };
 
-  const updateCategory = (id, updatedData) => {
-    setCategories(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
-    showToast(`دسته‌بندی با موفقیت ویرایش شد.`, 'success');
+  const updateCategory = async (id, updatedData) => {
+    try {
+      const updated = await api.db.update('categories', id, updatedData);
+      setCategories(prev => prev.map(c => c.id === id ? updated : c));
+      showToast('دسته‌بندی با موفقیت ویرایش شد.', 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در ویرایش دسته');
+    }
   };
 
-  const deleteCategory = (id) => {
+  const deleteCategory = async (id) => {
     if (id === 'all') {
       showToast('دسته‌بندی پیش‌فرض قابل حذف نیست.', 'error');
       return;
     }
-    setCategories(prev => prev.filter(c => c.id !== id));
-    showToast('دسته‌بندی با موفقیت حذف شد.', 'info');
+    try {
+      await api.db.remove('categories', id);
+      setCategories(prev => prev.filter(c => c.id !== id));
+      showToast('دسته‌بندی با موفقیت حذف شد.', 'info');
+    } catch (err) {
+      handleApiError(err, 'خطا در حذف دسته');
+    }
   };
 
   // --- ADMIN ORDER MANAGEMENT ---
-  const updateOrderStatus = (orderId, newStatus) => {
+  const updateOrderStatus = async (orderId, newStatus) => {
     const statusMap = {
       'pending': 'در انتظار بررسی',
       'processing': 'در حال بسته‌بندی معطر',
@@ -337,46 +396,79 @@ export const ShopProvider = ({ children }) => {
       'delivered': 'تحویل داده شده درب منزل',
       'cancelled': 'لغو شده / عودت وجه'
     };
-
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        return {
-          ...order,
-          status: newStatus,
-          statusLabel: statusMap[newStatus] || newStatus
-        };
-      }
-      return order;
-    }));
-    showToast(`وضعیت سفارش ${orderId} به «${statusMap[newStatus] || newStatus}» تغییر یافت.`, 'success');
+    try {
+      const updated = await api.db.update('orders', orderId, {
+        status: newStatus,
+        statusLabel: statusMap[newStatus] || newStatus
+      });
+      setOrders(prev => prev.map(o => o.id === orderId ? updated : o));
+      showToast(`وضعیت سفارش ${orderId} به «${statusMap[newStatus] || newStatus}» تغییر یافت.`, 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در تغییر وضعیت سفارش');
+    }
   };
 
-  const deleteOrder = (orderId) => {
-    setOrders(prev => prev.filter(o => o.id !== orderId));
-    showToast(`سفارش ${orderId} از سوابق حذف شد.`, 'info');
+  const deleteOrder = async (orderId) => {
+    try {
+      await api.db.remove('orders', orderId);
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      showToast(`سفارش ${orderId} از سوابق حذف شد.`, 'info');
+    } catch (err) {
+      handleApiError(err, 'خطا در حذف سفارش');
+    }
   };
 
   // --- ADMIN COUPON MANAGEMENT ---
-  const addCoupon = (coupon) => {
+  const addCoupon = async (coupon) => {
     const code = coupon.code.trim().toUpperCase();
     if (coupons.some(c => c.code === code)) {
       showToast('این کد تخفیف از قبل وجود دارد.', 'error');
       return false;
     }
-    setCoupons(prev => [...prev, { ...coupon, code }]);
-    showToast(`کد تخفیف ${code} ایجاد شد.`, 'success');
-    return true;
+    try {
+      const created = await api.db.create('coupons', { ...coupon, code });
+      setCoupons(prev => [...prev, created]);
+      showToast(`کد تخفیف ${code} ایجاد شد.`, 'success');
+      return true;
+    } catch (err) {
+      handleApiError(err, 'خطا در ایجاد کد تخفیف');
+      return false;
+    }
   };
 
-  const deleteCoupon = (code) => {
-    setCoupons(prev => prev.filter(c => c.code !== code));
-    showToast(`کد تخفیف ${code} حذف شد.`, 'info');
+  const deleteCoupon = async (code) => {
+    try {
+      await api.db.remove('coupons', code);
+      setCoupons(prev => prev.filter(c => c.code !== code));
+      showToast(`کد تخفیف ${code} حذف شد.`, 'info');
+    } catch (err) {
+      handleApiError(err, 'خطا در حذف کد تخفیف');
+    }
   };
 
   // --- ADMIN SETTINGS UPDATE ---
-  const updateStoreSettings = (newSettings) => {
-    setStoreSettings(prev => ({ ...prev, ...newSettings }));
-    showToast('تنظیمات و متون فروشگاه با موفقیت ذخیره شدند! 🌸', 'success');
+  const updateStoreSettings = async (newSettings) => {
+    try {
+      const updated = await api.db.updateSettings(newSettings);
+      setStoreSettings(prev => ({ ...prev, ...updated }));
+      showToast('تنظیمات و متون فروشگاه با موفقیت ذخیره شدند! 🌸', 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در ذخیره تنظیمات');
+    }
+  };
+
+  // --- ORDER PLACEMENT (used by CheckoutModal) ---
+  const placeOrder = async (orderData) => {
+    // orderData must include the fields needed on the server side.
+    // The server generates the id if missing.
+    try {
+      const saved = await api.db.createPublic('orders', orderData);
+      setOrders(prev => [saved, ...prev]);
+      return saved;
+    } catch (err) {
+      handleApiError(err, 'خطا در ثبت سفارش');
+      throw err;
+    }
   };
 
   // --- CART OPERATIONS ---
@@ -572,28 +664,75 @@ export const ShopProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAdminLogin = (adminData) => {
-    const authData = {
-      user: adminData,
-      timestamp: Date.now()
-    };
-    localStorage.setItem('abr_soorati_admin_auth_v3', JSON.stringify(authData));
+  const handleAdminLogin = async (adminData) => {
+    // Token is already saved by AdminLoginModal via api.setToken()
     setAdminUser(adminData);
     setIsAdminAuthenticated(true);
     setAdminLoginModalOpen(false);
     setAdminActiveTab('overview');
     setCurrentView('admin');
+    // Load orders (admin-only)
+    try {
+      const o = await api.db.list('orders');
+      if (Array.isArray(o)) setOrders(o);
+    } catch (e) { /* ignore */ }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showToast(`خوش آمدید ${adminData.email}! 👋`, 'success');
+    showToast(`خوش آمدید ${adminData.name || adminData.email}! 👋`, 'success');
   };
 
-  const handleAdminLogout = () => {
-    localStorage.removeItem('abr_soorati_admin_auth_v3');
+  const handleAdminLogout = async () => {
+    try { await api.auth.logout(); } catch (e) { /* ignore */ }
+    api.setToken(null);
+    // Clear old localStorage key too
+    try { localStorage.removeItem('abr_soorati_admin_auth_v3'); } catch (e) {}
     setAdminUser(null);
     setIsAdminAuthenticated(false);
+    setOrders([]);  // Clear admin-only data from memory
     setCurrentView('home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast('با موفقیت از حساب خارج شدید.', 'info');
+  };
+
+  // Change password (used from AdminSettings)
+  const changeAdminPassword = async (currentPassword, newPassword) => {
+    try {
+      await api.auth.changePassword(currentPassword, newPassword);
+      showToast('رمز عبور با موفقیت تغییر کرد. 🔐', 'success');
+      return true;
+    } catch (err) {
+      showToast(err.message || 'خطا در تغییر رمز', 'error');
+      return false;
+    }
+  };
+
+  // Backup / restore
+  const exportDatabase = async () => {
+    try {
+      await api.backup.exportUrl();
+      showToast('فایل پشتیبان دانلود شد. 📦', 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در دانلود فایل پشتیبان');
+    }
+  };
+
+  const importDatabase = async (data) => {
+    try {
+      await api.backup.import(data);
+      // Reload data
+      const [p, c, cp, s, o] = await Promise.all([
+        api.db.list('products'),
+        api.db.list('categories'),
+        api.db.list('coupons'),
+        api.db.getSettings(),
+        api.db.list('orders').catch(() => [])
+      ]);
+      setProducts(p); setCategories(c); setCoupons(cp);
+      setStoreSettings(prev => ({ ...prev, ...s }));
+      if (Array.isArray(o)) setOrders(o);
+      showToast('پشتیبان با موفقیت بازیابی شد.', 'success');
+    } catch (err) {
+      handleApiError(err, 'خطا در بازیابی پشتیبان');
+    }
   };
 
   const navigateToFlashDeals = () => {
@@ -702,7 +841,13 @@ export const ShopProvider = ({ children }) => {
         adminLoginModalOpen,
         setAdminLoginModalOpen,
         handleAdminLogin,
-        handleAdminLogout
+        handleAdminLogout,
+        changeAdminPassword,
+        exportDatabase,
+        importDatabase,
+        placeOrder,
+        isLoading,
+        apiOnline
       }}
     >
       {children}
