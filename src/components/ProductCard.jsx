@@ -32,9 +32,9 @@ export const ProductCard = ({ product }) => {
         {/* Badge Overlay (Top Right) */}
         {product.badge && (
           <div className="absolute top-3 right-3">
-            <span className={`${product.badgeColor || 'bg-rose-500'} text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl shadow-md flex items-center gap-1`}>
-              <Sparkles className="w-3 h-3" />
-              <span>{product.badge}</span>
+            <span className={`${product.badgeColor || 'bg-rose-500'} text-white text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-xl shadow-md flex items-center gap-1 whitespace-nowrap`}>
+              <Sparkles className="w-3 h-3 shrink-0" />
+              <span className="truncate max-w-[6rem]">{product.badge}</span>
             </span>
           </div>
         )}

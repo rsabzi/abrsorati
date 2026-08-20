@@ -5,8 +5,9 @@
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
 
-# SPA fallback: unknown routes serve index.html, but /api/* is handled by the function via `config.path`.
+# SPA fallback: unknown routes serve index.html, but /api/* is rewritten to the function path below.
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/db/:splat"

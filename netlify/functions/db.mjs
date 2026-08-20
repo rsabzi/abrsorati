@@ -6,7 +6,7 @@ import { getStore } from '@netlify/blobs';
 import bcrypt from 'bcryptjs';
 
 // Default seed data — used the very first time the site is deployed.
-import { PRODUCTS_SEED, CATEGORIES_SEED, COUPONS_SEED, SETTINGS_SEED, ORDERS_SEED } from './_seed.mjs';
+import { PRODUCTS_SEED, CATEGORIES_SEED, COUPONS_SEED, SETTINGS_SEED, ORDERS_SEED } from './_shared/seed.mjs';
 
 const COLLECTIONS = {
   products:   { key: 'products.json',   seed: PRODUCTS_SEED,   idField: 'id' },
@@ -108,6 +108,11 @@ export default async (req, context) => {
   }
 
   try {
+    // ---------- HEALTH ----------
+    if (action === 'health') {
+      return new Response(JSON.stringify({ status: 'ok', service: 'db', time: new Date().toISOString() }), { headers: cors });
+    }
+
     await ensureDefaultAdmin();
 
     // ---------- AUTH ROUTES ----------
@@ -293,8 +298,4 @@ export default async (req, context) => {
     console.error('DB function error:', err);
     return new Response(JSON.stringify({ error: err.message || 'internal error' }), { status: 500, headers: cors });
   }
-};
-
-export const config = {
-  path: '/api/*'
 };

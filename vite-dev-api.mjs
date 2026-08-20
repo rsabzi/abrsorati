@@ -12,7 +12,7 @@ import {
   COUPONS_SEED,
   SETTINGS_SEED,
   ORDERS_SEED
-} from './netlify/functions/_seed.mjs';
+} from './netlify/functions/_shared/seed.mjs';
 
 const DB_FILE = path.resolve('.dev-db.json');
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
@@ -128,6 +128,12 @@ export default function devApiPlugin() {
           const [action, ...rest] = parts;
 
           const db = loadDb();
+
+          // ---------- HEALTH ----------
+          if (action === 'health') {
+            return json(res, 200, { status: 'ok', service: 'db', time: new Date().toISOString() });
+          }
+
           await ensureDefaultAdmin(db);
 
           // ---------- AUTH ----------
