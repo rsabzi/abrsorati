@@ -91,9 +91,15 @@ async function requireAdmin(req) {
 export default async (req, context) => {
   const url = new URL(req.url);
   const parts = url.pathname.split('/').filter(Boolean);
-  // Route shape: /.netlify/functions/db/{action}/{...}
-  const idxDb = parts.indexOf('db');
-  const segments = idxDb >= 0 ? parts.slice(idxDb + 1) : parts;
+  let segments = parts;
+  const dbIdx = parts.indexOf('db');
+  const apiIdx = parts.indexOf('api');
+  if (dbIdx >= 0) {
+    segments = parts.slice(dbIdx + 1);
+  } else if (apiIdx >= 0) {
+    segments = parts.slice(apiIdx + 1);
+  }
+  console.log('[db]', req.method, url.pathname);
   const [action, ...rest] = segments;
 
   const cors = {

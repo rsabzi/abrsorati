@@ -125,7 +125,16 @@ export default function devApiPlugin() {
 
           const url = new URL(req.url, 'http://x');
           const parts = url.pathname.split('/').filter(Boolean);
-          const [action, ...rest] = parts;
+          let segments = parts;
+          const dbIdx = parts.indexOf('db');
+          const apiIdx = parts.indexOf('api');
+          if (dbIdx >= 0) {
+            segments = parts.slice(dbIdx + 1);
+          } else if (apiIdx >= 0) {
+            segments = parts.slice(apiIdx + 1);
+          }
+          console.log('[db]', req.method, url.pathname);
+          const [action, ...rest] = segments;
 
           const db = loadDb();
 
